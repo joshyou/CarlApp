@@ -52,4 +52,5 @@ function makeApiCalls() {
 	$("#mainTableDiv").html(str);
 
 	// todo: API calls
+	api();
 }

@@ -1,2 +1,2 @@
-plugins: hello-world
-active: hello-world
+plugins: hello-world, campus-map, test
+active: hello-world, campus-map, test

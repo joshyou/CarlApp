@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>InAppBrowser Tester</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="../cordova.js"></script>
+    <script src="../jquery.js"></script>
+</head>
+<body>
+    <div data-role="view">
+        <div>
+            <h1>Welcome!</h1>
+            <button data-role="button" onclick="setName()">Set Name</button>
+        </div>
+    </div>
+    <script>
+        function setName() {
+            var win = window.open( "http://jsfiddle.net/tj_vantoll/K2yqc/show", "_blank",
+              "EnableViewPortScale=yes" );
+
+            win.addEventListener( "loadstop", function() {
+                win.executeScript({ code: "localStorage.setItem( 'name', '' );" });
+                var loop = setInterval(function() {
+                    win.executeScript(
+                        {
+                            code: "localStorage.getItem( 'name' )"
+                        },
+                        function( values ) {
+                            var name = values[ 0 ];
+                            if ( name ) {
+                                clearInterval( loop );
+                                win.close();
+                                $( "h1" ).html( "Welcome " + name + "!" );
+                            }
+                        }
+                    );
+                });
+            });
+        }
+    </script>
+</body>
+</html>

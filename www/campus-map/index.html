@@ -1,0 +1,60 @@
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=0.1, maximum-scale=1.0, minimum-scale=0.1, user-scalable=yes"/>
+<script>
+function onError(error) {
+    alert('code: '    + error.code    + '\n' +
+          'message: ' + error.message + '\n');
+}
+
+var onSuccess = function(position) {
+	long = position.coords.longitude;
+	lat = position.coords.latitude;
+	acc = position.coords.accuracy;
+	document.getElementById("out").innerHTML = long + "<br/>" + lat + "<br/>" + acc;
+}
+
+var cvs, c, img;
+img = new Image();
+var shouldDraw = false;
+img.onload = function() {
+	shouldDraw = true;
+}
+img.src = "map.png"
+
+var long, lat, acc;
+var x, y, r;
+
+// 4250 × 5500
+
+window.onload = function () {
+	setInterval("draw()", 1000);
+}
+
+function draw() {
+	var xRecFeet = (long + 93.14965)*259000*1.033922261;
+	var yRecFeet = (lat - 44.46408)*364000*1.080161476;
+	x = xRecFeet + 3281;
+	y = 1859 - yRecFeet - 25;
+	r = Math.min(4*acc, 50);
+	// document.getElementById("out").innerHTML += x + "<br/>" + y + "<br/>";
+
+	var posDiv = document.getElementById("pos");
+	posDiv.style.width = 2*r + "px";
+	posDiv.style.height = 2*r + "px";
+	posDiv.style.left = (x-r) + "px";
+	posDiv.style.top = (y-r) + "px";
+	posDiv.style.top = (y-r) + "px";
+	posDiv.style.borderRadius = (10*r+10) + "px";
+
+	navigator.geolocation.getCurrentPosition(onSuccess, onError);
+}
+</script>
+</head>
+<body>
+<img src="map.png" style="position: absolute; top: 0; left: 0; width: 4250px; height: 5500px;" />
+<div id="pos" style="position: absolute; width: 100px; height: 100px; background-color: rgba(0, 0, 255, 0.7); border: 10px solid blue;"></div>
+<div id="out" style="background-color: red; position: absolute; font-size: 72pt"></div>
+</body>
+</html>
