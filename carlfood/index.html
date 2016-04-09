@@ -1,0 +1,331 @@
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=1.0, minimum-scale=1.0, maximum-scale=1.0">
+<script>
+function ajax(txt) {
+	if(window.XMLHttpRequest) {
+		ajax = new XMLHttpRequest();
+	}
+	else {
+		ajax = new ActiveXObject("Microsoft.XMLHTTP");
+	}
+	
+	ajax.onreadystatechange = function() {
+		if(ajax.readyState==4) {
+			pars(ajax.responseText);
+		}
+	}
+	ajax.open("GET",txt,true);
+	ajax.send();
+}
+
+/*
+	portion size	calories	total fat*	sat fat	carb	fiber	protein	sodium	tag
+	*/
+
+function Food(str) {
+	var arr = str.split("\t");
+	this.name = arr[0];
+	this.servingSize = arr[1];
+	this.calories = arr[2];
+	this.totalFat = arr[3];
+	this.satFat = arr[4];
+	this.carbs = arr[5];
+	this.fiber = arr[6];
+	this.protein = arr[7];
+	this.sodium = arr[8];
+	this.tags = arr[9].split(/,/g);
+}
+
+var foods;
+function pars(txt) {
+	var arr = txt.split(/\r/g);
+	foods = new Array(arr.length);
+	for(var i=0; i<foods.length; i++) {
+		foods[i] = new Food(arr[i]);
+	}
+}
+
+function search() {
+	var txt = document.getElementById("searchField").value;
+	txt = txt.toLowerCase();
+	var arr = txt.split(/ /g);
+	var scores = new Array(foods.length);
+	for(var i=0; i<scores.length; i++) {
+		scores[i] = 0;
+		for(var j=0; j<arr.length; j++) {
+			if(arr[j].length < 3)
+				continue;
+			if(foods[i].name.search(arr[j]) > -1) {
+				scores[i] += 100;
+			}
+			for(var k=0; k<foods[i].tags.length; k++) {
+				if(foods[i].tags[k].search(arr[j]) > -1) {
+					scores[i]++;
+				}
+			}
+		}
+	}
+
+	var ranks = new Array(scores.length);
+	for(var i=0; i<ranks.length; i++) {
+		ranks[i] = i;
+	}
+
+	for(var i=0; i<ranks.length; i++) {
+		for(var j=1; j<ranks.length; j++) {
+			if(scores[ranks[j]] > scores[ranks[j-1]]) {
+				var sto = ranks[j];
+				ranks[j] = ranks[j-1];
+				ranks[j-1] = sto;
+			}
+		}
+	}
+
+	var rtn = "<table id=\"mainTable\"><thead><tr><td>Food</td><td>Tags</td></thead><tbody>";
+	for(var i=0; i<ranks.length; i++) {
+		if(scores[ranks[i]] == 0 || i > 100)
+			break;
+		rtn += "<tr onclick=\"details(" + ranks[i] + ")\">"
+		rtn += "<td>" + foods[ranks[i]].name + "</td>";
+		rtn += "<td>" + foods[ranks[i]].tags + "</td>";
+		rtn += "</tr>";
+	}
+	rtn += "</tbody></table>"
+
+	if(rtn.length == 138)
+		document.getElementById("results").innerHTML = "";
+	else
+		document.getElementById("results").innerHTML = rtn;
+}
+
+function details(index) {
+	var str = "<table>"
+	str += "<tr><td colspan=\"2\"><h1>" + foods[index].name + "</h1></td></tr>";
+	str += "<tr><td><b>Portion</b></td><td><b>" + foods[index].servingSize + "</b></td></tr>"
+	str += "<tr><td><b>Cal</b></td><td><b>" + foods[index].calories + "</b></td></tr>"
+	str += "<tr><td><b>Fat</b></td><td><b>" + foods[index].totalFat + " g</b></td></tr>"
+	str += "<tr><td><b>Carbs</b></td><td><b>" + foods[index].carbs + " g</b></td></tr>"
+	str += "<tr><td><b>Protein</b></td><td><b>" + foods[index].protein + " g</b></td></tr>"
+	str += "<tr><td><b>Sodium</b></td><td><b>" + foods[index].sodium + " mg</b></td></tr>"
+	str += "</table>"
+
+	document.getElementById("infoDiv").innerHTML = str;
+	document.getElementById("darkerDiv").style.display = "block";
+}
+
+function hideDetails() {
+	document.getElementById("darkerDiv").style.display = "none";
+}
+
+onload = ajax("bon appetit.txt");
+
+onload = start;
+
+function start() {
+	update();
+	setInterval("update()", 1000);
+}
+
+function update() {
+	var d = new Date();
+	var day = d.getDay();
+	var hour = d.getHours();
+	for(var key in times) {
+		var arr = times[key][day];
+		var isOpen = false;
+		for(var i=0; i<arr.length; i++) {
+			isOpen = isOpen || inTimeRange(d, arr[i]);
+		}
+		var cvs = document.getElementById(key+"-cvs");
+		cvs.width = 100;
+		cvs.height = 50;
+		var c = cvs.getContext("2d");
+		if(isOpen)
+			drawOpen(key, cvs, c);
+		else
+			drawClosed(key, cvs, c);
+	}
+}
+
+var fontSize = 18;
+
+function drawOpen(key, cvs, c) {
+	c.fillStyle = "green";
+	c.fillRect(0, 0, cvs.width, cvs.height);
+	c.fillStyle = "white";
+	c.font = fontSize + "pt Arial";
+	var w = c.measureText(key).width
+	c.fillText(key, cvs.width/2 - w/2, cvs.height/2+fontSize/2);
+}
+
+function drawClosed(key, cvs, c) {
+	c.fillStyle = "red";
+	c.fillRect(0, 0, cvs.width, cvs.height);
+	c.fillStyle = "white";
+	c.font = fontSize + "pt Arial";
+	var w = c.measureText(key).width
+	c.fillText(key, cvs.width/2 - w/2, cvs.height/2+fontSize/2);
+}
+
+function arrayofRangesToString(arr) {
+	if(arr.length == 0)
+		return "Closed Today";
+	var rtn = "";
+	for(var i=0; i<arr.length; i++) {
+		var sp = arr[i].split(/ - /g);
+		if(sp[0] == "0:00")
+			continue;
+		rtn += convert24To12(sp[0]);
+		rtn += "-"
+		rtn += convert24To12(sp[1]);
+		rtn += "&nbsp;&nbsp;&nbsp;";
+	}
+	return rtn;
+}
+
+function inTimeRange(d, range) {
+	var arr = range.split(/ - /g);
+	if(arr.length != 2)
+		return false;
+	arr[0] = arr[0].split(/:/g);
+	arr[1] = arr[1].split(/:/g);
+	if(arr[0].length != 2 || arr[1].length != 2)
+		return false;
+	var start = parseInt(arr[0][0])+ parseInt(arr[0][1])/60;
+	var end = parseInt(arr[1][0])+ parseInt(arr[1][1])/60;
+	var t = d.getHours() + d.getMinutes()/60;
+	return (start <= t && t <= end);
+}
+
+function convert24To12(input) {
+	var arr = input.split(/:/g);
+	if(parseInt(arr[0]) <= 12)
+		return input;
+	else if(parseInt(arr[0]) <= 24)
+		return (parseInt(arr[0])-12) + ":" + arr[1];
+	else
+		return (parseInt(arr[0])-24) + ":" + arr[1];
+}
+
+
+var times = {
+	// https://apps.carleton.edu/campus/dining_services/facilities/
+	"burton": [
+		["11:30 - 13:00", "17:45 - 20:00"],
+		["7:30 - 10:00", "11:30 - 13:30", "17:45 - 20:00"],
+		["7:30 - 10:00", "11:30 - 13:30", "17:45 - 20:00"],
+		["7:30 - 10:00", "11:30 - 13:30", "17:45 - 20:00"],
+		["7:30 - 10:00", "11:30 - 13:30", "17:45 - 20:00"],
+		["7:30 - 10:00", "11:30 - 13:30", "17:45 - 20:00"],
+		["11:30 - 13:00", "17:45 - 20:00"]
+	],
+	"ldc": [
+		["10:30 - 13:00", "16:45 - 19:00"],
+		["7:30 - 10:00", "11:30 - 14:00", "16:45 - 19:00"],
+		["7:30 - 10:00", "11:30 - 13:45", "16:45 - 19:00"],
+		["7:30 - 10:00", "11:30 - 14:00", "16:45 - 19:00"],
+		["7:30 - 10:00", "11:30 - 13:45", "16:45 - 19:00"],
+		["7:30 - 10:00", "11:30 - 13:45", "16:45 - 19:00"],
+		["8:00 - 9:30", "10:30 - 13:00", "16:45 - 19:00"]
+	],
+	"sayles": [
+		["0:00 - 1:00", "12:00 - 24:00"],
+		["8:00 - 24:00"],
+		["8:00 - 24:00"],
+		["8:00 - 24:00"],
+		["8:00 - 24:00"],
+		["8:00 - 25:00"],
+		["0:00 - 1:00", "9:00 - 25:00"]
+	],
+	"weitz": [
+		[],
+		["8:00 - 19:00"],
+		["8:00 - 19:00"],
+		["8:00 - 19:00"],
+		["8:00 - 19:00"],
+		["8:00 - 19:00"],
+		[]
+	]
+};
+
+</script>
+<style>
+
+h1 {
+	text-align: center;
+	margin: 0;
+}
+
+#openTable {
+	margin-left: auto;
+	margin-right: auto;
+}
+
+canvas {
+	width: 100%;
+}
+
+html {
+	font-size: 20pt;
+}
+
+#searchField {
+	width: 100%;
+	font-weight: bold;
+	font-size: 1em;
+}
+
+#mainTable {
+	width: 100%;
+	font-size: 1em;
+}
+
+#darkerDiv {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	display: none;
+	background-color: rgba(0, 0, 0, 0.3);
+}
+
+#infoDiv {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	background-color: white;
+	min-width: 50%;
+	padding: 1em;
+}
+
+#infoDiv > table {
+	width: 100%;
+	font-size: 1em;
+}
+
+</style>
+</head>
+<body>
+<h1>CarlFood</h1>
+<table id="openTable">
+	<tr>
+		<td id="burton"><canvas id="burton-cvs"></canvas></td>
+		<td id="ldc"><canvas id="ldc-cvs"></canvas></td>
+		<td id="sayles"><canvas id="sayles-cvs"></canvas></td>
+		<td id="weitz"><canvas id="weitz-cvs"></canvas></td>
+	</tr>
+</table>
+<input type="text" id="searchField" onkeyup="search();">
+<div id="results"></div>
+<div id="footer">
+	<b>Feedback:</b> <a href="mailto:tfredding@gmail.com">reddingt@carleton.edu</a>
+	<br />
+	<b>Source:</b> <a href="http://www.cafebonappetit.com/wellness/nutrition-facts-tables">café bon appétit nutritional facts tables</a>
+</div>
+<div id="darkerDiv"><div id="infoDiv" onclick="hideDetails();">a</div></div>
+</body>
+</html>
