@@ -1,0 +1,166 @@
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=1.0, minimum-scale=1.0, maximum-scale=1.0">
+<script>
+
+function ajax(txt) {
+	if(window.XMLHttpRequest)
+		ajaxObj = new XMLHttpRequest();
+	else
+		ajaxObj = new ActiveXObject("Microsoft.XMLHTTP");
+	
+	ajaxObj.onreadystatechange = function() {
+		if(ajaxObj.readyState==4) {
+			parseMainCalendar(ajaxObj.responseText);
+		}
+	}
+	ajaxObj.open("GET", txt, true);
+	ajaxObj.send();
+}
+
+onload = ajax("https://apps.carleton.edu/calendar/?start_date=2016-04-09&format=ical");
+
+/*
+.ics files look like
+
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Reason 4.0//EN
+X-WR-CALNAME;VALUE=TEXT:Campus Calendar
+X-WR-TIMEZONE:America/Chicago
+BEGIN:VEVENT
+UID:20150526115218-1281521@carleton.edu
+SUMMARY:CFR "Office Hours"
+DESCRIPTION:Discuss grant ideas with Christopher Tassava, Associate Director of CFR. No
+  "reservations" needed; just be ready to talk about your project.
+LOCATION:Sayles-Hill Great Space
+LAST-MODIFIED:20150526T115300
+CREATED:20150526T115218
+DTSTART:20150521T133000
+DURATION:PT2H0M0S
+RRULE:FREQ=WEEKLY;UNTIL=20170629T235959;INTERVAL=1;BYDAY=TH
+SEQUENCE:1
+END:VEVENT
+BEGIN:VEVENT
+...
+DTEND;VALUE=DATE:20200614
+RRULE:FREQ=DAILY;UNTIL=20200907T000000;INTERVAL=1
+SEQUENCE:1
+END:VEVENT
+END:VCALENDAR
+
+*/
+
+
+
+// 20160409T172800 -> 2016 04 09 17 28 00 -> Date(Sat Apr 09 2016 17:28:00)
+function dateStringToDate(str) {
+	if (str == undefined) {
+		return undefined;
+	}
+	else {
+		// day and time
+		var year = str.substr(0, 4);
+		var month = str.substr(4, 2);
+		var day = str.substr(6, 2);
+		var hour = str.substr(9, 2);
+		var min = str.substr(11, 2);
+		var sec = str.substr(13, 2);
+		return new Date(year + "-" + month + "-" + day + "T" + hour + ":" + min + ":" + sec);
+	}
+}
+
+// 20160409 -> 2016 04 09 -> Date(Sat Apr 09 2016)
+function shortDateStringToDate(str) {
+	if (str == undefined) {
+		return undefined;
+	}
+	else {
+		// day and time
+		var year = str.substr(0, 4);
+		var month = str.substr(4, 2);
+		var day = str.substr(6, 2);
+		return new Date(year + "-" + month + "-" + day);
+	}
+}
+
+// PT1H0M0S -> 1 hour, 1 min, 1 sec -> 3600
+function durationStringtoSeconds(str) {
+	if(str == undefined)
+		return undefined;
+	str = str.substr(2);
+	var rtn = 0;
+	var sub = 0;
+	for (var i=0; i<str.length; i++) {
+		if (isNum(str[i])) {
+			sub *= 10;
+			sub += parseInt(str[i]);
+		}
+		else {
+			if(str[i] == 'H')
+				rtn += 3600 * sub;
+			else if(str[i] == 'M')
+				rtn += 60 * sub;
+			else if(str[i] == 'S')
+				rtn += sub;
+			sub = 0;
+		}
+	}
+	return rtn;
+}
+
+// is "c" a numeral character?
+function isNum(c) {
+	return c in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+}
+
+function Event(txt, i) {
+	var arr = txt.split('\n');
+	dic = {};
+	for (var i=0; i<arr.length; i++) {
+		for (var j=0; j<arr[i].length; j++) {
+			if (arr[i][j] == ':') {
+				dic[arr[i].substr(0, j)] = arr[i].substr(j+1);
+				break;
+			}
+		}
+	}
+	this.name = dic["SUMMARY"];
+	this.start = dateStringToDate(dic["DTSTART"]);
+	if (this.start == undefined)
+		this.start = shortDateStringToDate(dic["DTSTART;VALUE=DATE"]);
+	this.duration = durationStringtoSeconds(dic["DURATION"]);
+	this.location = dic["LOCATION"];
+	this.url = dic["URL"];
+	this.dic = dic;
+}
+
+var events = new Array();
+
+function parseMainCalendar(txt) {
+	var arr = txt.split('END:VEVENT');
+	for (var i=0; i<arr.length; i++)
+		events.push(new Event(arr[i], i));
+
+	var str = "<table><tbody>";
+	for (var i=0; i<events.length; i++) {
+		str += "<tr>";
+		str += "<td>" + i + "</td>"
+		if (events[i].url == undefined)
+			str += "<td>" + events[i].name + "</td>";
+		else
+			str += "<td><a href=\"" + events[i].url + "\">" + events[i].name + "</a></td>";
+		str += "<td>" + events[i].start + "</td>";
+		str += "<td>" + events[i].duration + "</td>";
+		str += "</tr>";
+	}
+	str += "</tbody></table>";
+	document.getElementById("out").innerHTML = str;
+}
+
+</script>
+<body>
+<div id="out"></div>
+</body>
+</html>
