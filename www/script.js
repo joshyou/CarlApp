@@ -1,19 +1,55 @@
-document.addEventListener("deviceready", onDeviceReady, false);
+function ajax(txt) {
+	if(window.XMLHttpRequest)
+		ajaxObj = new XMLHttpRequest();
+	else
+		ajaxObj = new ActiveXObject("Microsoft.XMLHTTP");
+	
+	ajaxObj.onreadystatechange = function() {
+		if(ajaxObj.readyState==4) {
+			parseSettings(ajaxObj.responseText);
+		}
+	}
+	ajaxObj.open("GET",txt,true);
+	ajaxObj.send();
+}
 
-// device APIs are available
-//
-function onDeviceReady() {
-    var ref = window.open('https://apps.carleton.edu/login/?dest_page=https%3A%2F%2Fapps.carleton.edu%2Fcampus%2Fonecard%2Fdashboard%2F&msg_uname=onecard_login_blurb&redir_link_text=the%20OneCard%20dashboard', '_blank', 'location=yes');
-    ref.addEventListener('loadstart', function(event) {
-    	// todo
-    });
-    ref.addEventListener('loadstop', function(event) {
-    	var username = "reddingt";
-    	var password = "Matrix1010";
-    	ref.executeScript({
-            code: "var un = document.getElementById('usernameLoginInput'); var pw = document.getElementById('passwordLoginInput'); un.value = '" + username + "'; pw.value = '" + password + "'; $('#loginModule form')[0].submit();"
-        });
-    });
-    ref.addEventListener('loaderror', function(event) { alert('error: ' + event.message); });
-    ref.addEventListener('exit', function(event) { alert(event.type); });
+window.onload = function () {
+	ajax("preferences.txt");
+}
+
+var settings = {};
+var settingsAreReady = false;
+function parseSettings(txt) {
+	arr = txt.split("\n");
+	for (var i=0; i<arr.length; i++) {
+		arr[i] = arr[i].split(": ");
+		if(arr[i].length == 2) {
+			settings[arr[i][0]] = arr[i][1].split(", ");
+		}
+		else {
+			alert("Error In Preferences");
+		}
+	}
+	settingsAreReady = true;
+
+	$("#settings-icon").css("display", "block");
+	$("#settings-icon").click(function () {
+		if($("#settings").is(":visible"))
+			$("#settings").hide();
+		else
+			$("#settings").show();
+	});
+
+	makeApiCalls();
+}
+
+function makeApiCalls() {
+	var str = "<table><tbody>";
+	for (var i=0; i<settings["active"].length; i++) {
+		str += "<tr><td><a href=\"" + settings["active"][i] + "/index.html\">" + settings["active"][i] + "</a></td></tr>";
+	}
+	str += "</tbody></table>";
+	$("#mainTableDiv").html(str);
+
+	// todo: API calls
 }

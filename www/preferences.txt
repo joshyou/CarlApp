@@ -1,0 +1,2 @@
+plugins: hello-world
+active: hello-world
