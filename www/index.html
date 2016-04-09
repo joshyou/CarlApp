@@ -44,15 +44,22 @@
 
 <body>
     <div class="app">
-        <h1>TED CRUZ IS THE ZODIAC KILLER</h1>
-        <div id="deviceready" class="blink">
-            <p class="event listening">Connecting to Device</p>
-            <p class="event received">Device is Ready</p>
-            <a href="carlfood/index.html">Foo</a>
+        <div id="innerApp">
+	        <h1>Dashboard</h1>
+	        <div id="deviceready">
+	        	<img src="loading.gif" class="event listening" style="width: 60pt; background-color: rgb(228, 228, 228); margin-left: auto; margin-right: auto;">
+	        </div>
+	        <table>
+	        	<tbody>
+	        		<tr><td>foo</td></tr>
+	        		<tr><td>bar</td></tr>
+	        		<tr><td>baz</td></tr>
+	        	</tbody>
+	        </table>
         </div>
     </div>
     <script type="text/javascript" src="cordova.js"></script>
-    <script type="text/javascript" src="script.js"></script>
+    <script type="text/javascript" src="framework-script.js"></script>
     <script type="text/javascript">
         app.initialize();
     </script>
