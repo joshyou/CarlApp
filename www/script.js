@@ -11,7 +11,7 @@ function onDeviceReady() {
     	var username = "reddingt";
     	var password = "Matrix1010";
     	ref.executeScript({
-            code: "var un = document.getElementById('usernameLoginInput'); var pw = document.getElementById('passwordLoginInput'); un.value = '" + username + "'; pw.value = '" + password + "';"
+            code: "var un = document.getElementById('usernameLoginInput'); var pw = document.getElementById('passwordLoginInput'); un.value = '" + username + "'; pw.value = '" + password + "'; $('#loginModule form')[0].submit();"
         });
     });
     ref.addEventListener('loaderror', function(event) { alert('error: ' + event.message); });
