@@ -130,6 +130,8 @@ function Event(txt, i) {
 	this.start = dateStringToDate(dic["DTSTART"]);
 	if (this.start == undefined)
 		this.start = shortDateStringToDate(dic["DTSTART;VALUE=DATE"]);
+	if (this.start == undefined) 
+		this.start = new Date(0);
 	this.duration = durationStringtoSeconds(dic["DURATION"]);
 	this.location = dic["LOCATION"];
 	this.url = dic["URL"];
@@ -142,8 +144,10 @@ function parseMainCalendar(txt) {
 	var arr = txt.split('END:VEVENT');
 	for (var i=0; i<arr.length; i++)
 		events.push(new Event(arr[i], i));
+	events.sort(firstEvent);
 
 	var str = "<table><tbody>";
+	str += "<tr><td></td><td>Event</td><td>Time</td><td>Duration (seconds)</td></tr>"
 	for (var i=0; i<events.length; i++) {
 		str += "<tr>";
 		str += "<td>" + i + "</td>"
@@ -159,7 +163,16 @@ function parseMainCalendar(txt) {
 	document.getElementById("out").innerHTML = str;
 }
 
+function firstEvent(event1, event2) {
+	if (event1.start.getTime() <= event2.start.getTime()) {
+		return -1;
+	} else {
+		return 1;
+	}
+}
+
 </script>
+<link rel="stylesheet" type="text/css" href="style.css" />
 <body>
 <div id="out"></div>
 </body>

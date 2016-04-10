@@ -1,0 +1,8 @@
+#out {
+	background-color: rgb(153, 204, 255);
+	border: 1px solid blue;
+}
+
+table, td, tr {
+	border: 1px solid blue;
+}
