@@ -71,6 +71,16 @@ function dateStringToDate(str) {
 	}
 }
 
+function dateStringToTime(str) {
+	if (str == undefined) {
+		return undefined;
+	} else {
+		var hour = str.substr(9, 2);
+		var min = str.substr(11, 2);
+		return [hour, min];
+	}
+}
+
 // 20160409 -> 2016 04 09 -> Date(Sat Apr 09 2016)
 function shortDateStringToDate(str) {
 	if (str == undefined) {
@@ -128,10 +138,20 @@ function Event(txt, i) {
 	}
 	this.name = dic["SUMMARY"];
 	this.start = dateStringToDate(dic["DTSTART"]);
-	if (this.start == undefined)
+	this.hm = dateStringToTime(dic["DTSTART"]);
+	if (this.start == undefined) {
 		this.start = shortDateStringToDate(dic["DTSTART;VALUE=DATE"]);
-	if (this.start == undefined) 
+		this.hm = []
+	}
+	if (this.start == undefined) {
 		this.start = new Date(0);
+	}
+	this.time_string = String(this.start.getMonth() + 1) + "-" + String(this.start.getDate()) + "-" + String(this.start.getFullYear());
+	if (this.hm.length == 2) {
+		var hour_minute = " " + this.hm[0] + ":" + this.hm[1];
+		this.time_string += hour_minute;
+	}
+		
 	this.duration = durationStringtoSeconds(dic["DURATION"]);
 	this.location = dic["LOCATION"];
 	this.url = dic["URL"];
@@ -161,7 +181,8 @@ function parseMainCalendar(txt) {
 			str += "<td>" + events[i].name + "</td>";
 		else
 			str += "<td><a href=\"" + events[i].url + "\">" + events[i].name + "</a></td>";
-		str += "<td>" + events[i].start + "</td>";
+		//str += "<td>" + events[i].start + "</td>";
+		str += "<td>" + events[i].time_string + "</td>";
 		if (events[i].duration == undefined)
 			str += "<td>" + "N/A" + "</td>";
 		else
