@@ -44,19 +44,19 @@
 
 <body>
     <div class="app" id="deviceready">
-        <div class="event listening">
-            <img src="loading.gif" id="loading-image">
-        </div>
+        <div class="event listening"></div>
         <div id="innerApp">
-            <img id="settings-icon" src="gear.png">
             <h1>Dashboard</h1>
-            <a href="hello-world/index.html">Click Me</a>
             <div id="mainTableDiv">
+            	<table>
+            		<tbody>
+            			<tr><td><a href="campus-map/index.html">Map</a></td></tr>
+            			<tr><td><a href="hello-world/index.html">Money</a></td></tr>
+            			<tr><td><a href="carl-cal/index.html">Calendar</a></td></tr>
+            		</tbody>
+            	</table>
             </div>
             <div id="output"></div>
-        </div>
-        <div id="settings">
-            <h1>Settings</h1>
         </div>
     </div>
     <script type="text/javascript" src="cordova.js"></script>
