@@ -125,6 +125,15 @@ function isNum(c) {
 	return c in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
 }
 
+function dateToWeekday(d) {
+	var days = ["Sun", "Mon", "Tues", "Wed", "Thurs", "Fri", "Sat"];
+	if (d.getDay() < 6) {
+		return days[d.getDay()];
+	} else {
+		return undefined;
+	}
+
+}
 function Event(txt, i) {
 	var arr = txt.split('\n');
 	dic = {};
@@ -146,10 +155,17 @@ function Event(txt, i) {
 	if (this.start == undefined) {
 		this.start = new Date(0);
 	}
-	this.time_string = String(this.start.getMonth() + 1) + "-" + String(this.start.getDate()) + "-" + String(this.start.getFullYear());
-	if (this.hm.length == 2) {
-		var hour_minute = " " + this.hm[0] + ":" + this.hm[1];
-		this.time_string += hour_minute;
+	this.time_string = dateToWeekday(this.start) + " " + String(this.start.getMonth() + 1) + "-" + String(this.start.getDate()) + "-" + String(this.start.getFullYear());
+	//converts to AM/PM
+	if (this.hm.length == 2) { 
+		if (parseInt(this.hm[0]) > 12) {
+			var hour = String(parseInt(this.hm[0]) - 12);
+			var hour_minute = " " + hour + ":" + this.hm[1] + " P.M.";
+			this.time_string += hour_minute;
+		} else {
+			var hour_minute = " " + this.hm[0] + ":" + this.hm[1] + " A.M.";
+			this.time_string += hour_minute;
+		}
 	}
 		
 	this.duration = durationStringtoSeconds(dic["DURATION"]);
