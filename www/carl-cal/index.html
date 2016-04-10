@@ -189,7 +189,7 @@ function parseMainCalendar(txt) {
 	events.sort(firstEvent);
 
 	var str = "<table><tbody>";
-	str += "<tr><td></td><td>Event</td><td>Time</td><td>Duration (seconds)</td></tr>"
+	str += "<tr><td></td><td>Event</td><td>Time</td><td>Duration</td></tr>"
 	for (var i=0; i<events.length; i++) {
 		str += "<tr>";
 		str += "<td>" + i + "</td>"
@@ -201,8 +201,13 @@ function parseMainCalendar(txt) {
 		str += "<td>" + events[i].time_string + "</td>";
 		if (events[i].duration == undefined)
 			str += "<td>" + "N/A" + "</td>";
-		else
-			str += "<td>" + events[i].duration + "</td>";
+		else {
+			var hours = Math.floor(events[i].duration/3600);
+			var min = Math.round(events[i].duration/60);
+			if(min < 10)
+				min = "0" + min;
+			str += "<td>" + hours + ":" + min + "</td>";
+		}
 		str += "</tr>";
 	}
 	str += "</tbody></table>";
