@@ -142,8 +142,14 @@ var events = new Array();
 
 function parseMainCalendar(txt) {
 	var arr = txt.split('END:VEVENT');
-	for (var i=0; i<arr.length; i++)
-		events.push(new Event(arr[i], i));
+	for (var i=0; i<arr.length; i++) {
+		var event = new Event(arr[i], i);
+		var now = new Date();
+		if (event.start.getTime() >= now.getTime()) {
+			events.push(event);
+		}
+	}
+		
 	events.sort(firstEvent);
 
 	var str = "<table><tbody>";
@@ -156,7 +162,10 @@ function parseMainCalendar(txt) {
 		else
 			str += "<td><a href=\"" + events[i].url + "\">" + events[i].name + "</a></td>";
 		str += "<td>" + events[i].start + "</td>";
-		str += "<td>" + events[i].duration + "</td>";
+		if (events[i].duration == undefined)
+			str += "<td>" + "N/A" + "</td>";
+		else
+			str += "<td>" + events[i].duration + "</td>";
 		str += "</tr>";
 	}
 	str += "</tbody></table>";
