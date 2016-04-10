@@ -1,8 +1,18 @@
 #out {
-	background-color: rgb(153, 204, 255);
 	border: 1px solid blue;
 }
 
-table, td, tr {
+body {
+	background-color: rgb(153, 204, 255);
+}
+
+table {
+	background-color: rgb(255, 204, 60);
+	border: 1px solid blue;
+	width: 100%;
+}
+
+td {
+	background-color: rgb(255, 204, 60);
 	border: 1px solid blue;
 }
