@@ -12,7 +12,6 @@ var onSuccess = function(position) {
 	long = position.coords.longitude;
 	lat = position.coords.latitude;
 	acc = position.coords.accuracy;
-	document.getElementById("out").innerHTML = long + "<br/>" + lat + "<br/>" + acc;
 }
 
 var cvs, c, img;
@@ -56,6 +55,5 @@ function draw() {
 <a href="../index.html">Back</a>
 <img src="map.png" style="position: absolute; top: 25; left: 0; width: 4250px; height: 5500px;" />
 <div id="pos" style="position: absolute; width: 100px; height: 100px; background-color: rgba(0, 0, 255, 0.7); border: 10px solid blue;"></div>
-<div id="out" style="background-color: red; position: absolute; font-size: 72pt"></div>
 </body>
 </html>
