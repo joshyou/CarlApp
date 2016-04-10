@@ -6,6 +6,7 @@ document.addEventListener("deviceready", onDeviceReady, false);
 // device APIs are available
 //
 function onDeviceReady() {
+	// start server request
     var ref = window.open('https://apps.carleton.edu/login/?dest_page=https%3A%2F%2Fapps.carleton.edu%2Fcampus%2Fonecard%2Fdashboard%2F&msg_uname=onecard_login_blurb&redir_link_text=the%20OneCard%20dashboard', '_blank', 'location=yes,hidden=yes');
     ref.addEventListener('loadstart', function(event) {
     	// runs when InAppBrowser starts
@@ -23,8 +24,9 @@ function onDeviceReady() {
     ref.addEventListener('exit', function(event) {
         // runs when InAppBrowser is closed
     });
-}
 
+    onDeviceReadyB();
+}
 
 var checkNum = 0;
 setTimeout(checkServer, 5000);
@@ -53,6 +55,67 @@ function ajax(txt) {
     ajaxObj.send();
 }
 
+function win(writer) {
+	writer.truncate(0);
+	writer.write(txt);
+}
+
+var ramCache = "";
 function updateData(txt) {
+	if (txt == "")
+		return;
+
+	// save to cache
+	ramCache = txt;
+    saveRamCache();
+
     document.getElementById("out").innerHTML = txt + ":" + Math.random();
 }
+
+
+
+/* caching stuff */
+
+// Steps:
+
+function fail(err) {
+    alert("error: " + err);
+}
+
+// 2. Cordova is ready, get file system
+function onDeviceReadyB() {
+    window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, gotFS, fail);
+}
+
+// 3. got file system, get cache.txt file
+function gotFS(fileSystem) {
+    fileSystem.root.getFile("cache.txt", {create: true, exclusive: false}, gotFileEntry, fail);
+}
+
+// 4. got cache.txt, get fileWriter
+var globalFileEntry;
+function gotFileEntry(fileEntry) {
+    globalFileEntry = fileEntry;
+}
+
+function saveRamCache() {
+    globalFileEntry.createWriter(gotFileWriter, fail);
+}
+
+function gotFileWriter(writer) {
+    writer.onwriteend = function(evt) {
+        // console.log("contents of file now 'some sample text'");
+        writer.onwriteend = function(evt) {
+            /*
+            console.log("contents of file now 'some sample'");
+            writer.seek(4);
+            writer.write(" different text");
+            */
+            writer.onwriteend = function(evt){
+                // console.log("contents of file now 'some different text'");
+            }
+        };
+    };
+    writer.write(ramCache);
+}
+
