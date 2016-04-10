@@ -69,7 +69,40 @@ function updateData(txt) {
 	ramCache = txt;
     saveRamCache();
 
-    document.getElementById("out").innerHTML = txt + ":" + Math.random();
+    var arr = txt.split('\n');
+    var str = "<table><tbody>";
+    for (var i=0; i<arr.length; i++) {
+        arr[i] = arr[i].split('\t');
+        str += "<tr>";
+        for (var j=0; j<arr[i].length; j++) {
+            if(j == 0) {
+                if (arr[i][j] == "schillers") {
+                    str += "<td>Schillers</td>";
+                }
+                else if (arr[i][j] == "dining_dollars") {
+                    str += "<td>Dining Dollars</td>";
+                }
+                else if (arr[i][j] == "meals") {
+                    str += "<td>Meals Left</td>";
+                }
+                else {
+                    str += "<td>" + arr[i][j] + "</td>";
+                }
+            }
+            else if(j == 1) {
+                if (i == 0 || i == 1) {
+                    str += "<td>$" + arr[i][j] + "</td>";
+                }
+                else {
+                    str += "<td>" + arr[i][j] + "</td>";
+                }
+            }
+        }
+        str += "</tr>";
+    }
+    str += "</tbody></table>";
+
+    document.getElementById("out").innerHTML = str;
 }
 
 
