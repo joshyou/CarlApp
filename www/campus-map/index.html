@@ -37,7 +37,7 @@ function draw() {
 	var yRecFeet = (lat - 44.46408)*364000*1.080161476;
 	x = xRecFeet + 3281;
 	y = 1859 - yRecFeet - 25;
-	r = Math.max(acc, 40);
+	r = Math.max(10*Math.sqrt(acc), 40);
 	// document.getElementById("out").innerHTML += x + "<br/>" + y + "<br/>";
 
 	var posDiv = document.getElementById("pos");
@@ -53,7 +53,7 @@ function draw() {
 </script>
 </head>
 <body>
-<a href="../index.html" style="font-size: 144px; z-index: 10; margin-top: 1em; margin-left: 1em;">Back</a>
+<a href="../index.html" style="font-size: 144px; z-index: 10; position: relative; top: 1em;">Back</a>
 <img src="map.png" style="position: absolute; top: 25; left: 0; width: 4250px; height: 5500px; z-index: -10;" />
 <div id="pos" style="position: absolute; width: 100px; height: 100px; background-color: rgba(0, 0, 255, 0.7); border: 10px solid blue; z-index: 5;"></div>
 </body>
